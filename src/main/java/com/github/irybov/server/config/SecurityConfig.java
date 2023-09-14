@@ -13,38 +13,33 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-	 @Override
-	    protected void configure(HttpSecurity http) throws Exception {
-		 
-	        SavedRequestAwareAuthenticationSuccessHandler successHandler 
-	            = new SavedRequestAwareAuthenticationSuccessHandler();
-	        successHandler.setTargetUrlParameter("redirectTo");
-	        successHandler.setDefaultTargetUrl("/");
+	@Override
+    protected void configure(HttpSecurity http) throws Exception {
+	 
+        SavedRequestAwareAuthenticationSuccessHandler successHandler 
+            = new SavedRequestAwareAuthenticationSuccessHandler();
+        successHandler.setTargetUrlParameter("redirectTo");
+        successHandler.setDefaultTargetUrl("/");
 
-	        http
-	        	.authorizeRequests()
-	            .antMatchers("/assets/**").permitAll()
-	            .antMatchers("/actuator/**").permitAll()
-	            .antMatchers("/login").permitAll()
-	            .anyRequest().authenticated()
-	            	.and()
-	            .formLogin().loginPage("/login")
-	            .successHandler(successHandler)
-	            	.and()
-	            .logout()
-	            .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
-	            .invalidateHttpSession(true)
-	            .clearAuthentication(true)
-	            .deleteCookies("JSESSIONID")
-	            .logoutSuccessUrl("/login")
-	            .permitAll()
-	            	.and()
+        http
+        	.authorizeHttpRequests(urlConfig -> urlConfig
+    	            .antMatchers("/assets/**", "/login").permitAll()
+    	            .antMatchers("/actuator/**").hasRole("ADMIN")
+    	            .anyRequest().authenticated())
+            .formLogin(login -> login
+            		.loginPage("/login")
+            		.successHandler(successHandler))
+            .logout(logout -> logout
+            		.logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
+    	            .invalidateHttpSession(true)
+    	            .clearAuthentication(true)
+    	            .deleteCookies("JSESSIONID")
+    	            .logoutSuccessUrl("/login"))
 //	            .httpBasic(Customizer.withDefaults())
-	            .httpBasic()
-	            	.and()
-	            .csrf()
-	            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-	            .ignoringAntMatchers("/instances", "/instances/*", "/actuator/**");
-	    }
+//	            	.and()
+            .csrf()
+            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+            .ignoringAntMatchers("/instances", "/instances/*", "/actuator/**");
+    }
 	
 }
