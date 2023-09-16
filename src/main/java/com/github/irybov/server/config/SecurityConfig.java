@@ -1,7 +1,7 @@
 package com.github.irybov.server.config;
 
 import org.springframework.context.annotation.Configuration;
-//import org.springframework.security.config.Customizer;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -23,8 +23,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
         	.authorizeHttpRequests(urlConfig -> urlConfig
-    	            .antMatchers("/assets/**", "/login").permitAll()
-    	            .antMatchers("/actuator/**").hasRole("ADMIN")
+    	            .antMatchers("/login").permitAll()
+    	            .antMatchers("/assets/**", "/actuator/**").hasRole("ADMIN")
     	            .anyRequest().authenticated())
             .formLogin(login -> login
             		.loginPage("/login")
@@ -35,8 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     	            .clearAuthentication(true)
     	            .deleteCookies("JSESSIONID")
     	            .logoutSuccessUrl("/login"))
-//	            .httpBasic(Customizer.withDefaults())
-//	            	.and()
+	        .httpBasic(Customizer.withDefaults())
+//	            .and()
             .csrf()
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .ignoringAntMatchers("/instances", "/instances/*", "/actuator/**");
